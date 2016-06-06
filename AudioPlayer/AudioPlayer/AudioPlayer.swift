@@ -603,8 +603,9 @@ public class AudioPlayer: NSObject {
      */
     public func playItems(items: [AudioItem], startAtIndex index: Int = 0) {
         if items.count > 0 {
-            var idx = 0
-            enqueuedItems = items.map { (position: idx++, item: $0) }
+            enqueuedItems = items.enumerate().map { (idx, elem) in
+                (position: idx, item: elem)
+            }
             adaptQueueToPlayerMode()
             
             let startIndex: Int = {
@@ -641,8 +642,10 @@ public class AudioPlayer: NSObject {
      */
     public func addItemsToQueue(items: [AudioItem]) {
         if currentItem != nil {
-            var idx = enqueuedItems?.count ?? 0
-            var toAdd = items.map { (position: idx++, item: $0) }
+            let count = enqueuedItems?.count ?? 0
+            var toAdd = items.enumerate().map { (idx, item) in
+                (position: count + idx, item: item)
+            }
             if mode.contains(.Shuffle) {
                 toAdd = toAdd.shuffled()
             }
@@ -1082,7 +1085,7 @@ public class AudioPlayer: NSObject {
     
     //Aaaaand we: restart playing/go to next
     state = .Stopped
-    interruptionCount++
+    interruptionCount += 1
     retryOrPlayNext()
     }
     #endif

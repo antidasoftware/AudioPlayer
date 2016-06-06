@@ -262,7 +262,7 @@ public class AudioPlayer: NSObject {
     public override init() {
         super.init()
         
-        observe(ReachabilityChangedNotification, selector: "reachabilityStatusChanged:", object: reachability)
+        observe(ReachabilityChangedNotification, selector: #selector(AudioPlayer.reachabilityStatusChanged(_:)), object: reachability)
         reachability.startNotifier()
     }
     
@@ -316,7 +316,7 @@ public class AudioPlayer: NSObject {
                 let target = ClosureContainer() { [weak self] sender in
                     self?.adjustQualityIfNecessary()
                 }
-                let timer = NSTimer(timeInterval: adjustQualityTimeInternal, target: target, selector: "callSelectorOnTarget:", userInfo: nil, repeats: false)
+                let timer = NSTimer(timeInterval: adjustQualityTimeInternal, target: target, selector: #selector(ClosureContainer.callSelectorOnTarget(_:)), userInfo: nil, repeats: false)
                 NSRunLoop.mainRunLoop().addTimer(timer, forMode: NSRunLoopCommonModes)
                 qualityAdjustmentTimer = timer
                 
@@ -329,12 +329,12 @@ public class AudioPlayer: NSObject {
                 }
                 
                 #if os(iOS) || os(tvOS)
-                    observe(AVAudioSessionInterruptionNotification, selector: "audioSessionGotInterrupted:")
-                    observe(AVAudioSessionRouteChangeNotification, selector: "audioSessionRouteChanged:")
-                    observe(AVAudioSessionMediaServicesWereLostNotification, selector: "audioSessionMessedUp:")
-                    observe(AVAudioSessionMediaServicesWereResetNotification, selector: "audioSessionMessedUp:")
+                    observe(AVAudioSessionInterruptionNotification, selector: #selector(AudioPlayer.audioSessionGotInterrupted(_:)))
+                    observe(AVAudioSessionRouteChangeNotification, selector: #selector(AudioPlayer.audioSessionRouteChanged(_:)))
+                    observe(AVAudioSessionMediaServicesWereLostNotification, selector: #selector(AudioPlayer.audioSessionMessedUp(_:)))
+                    observe(AVAudioSessionMediaServicesWereResetNotification, selector: #selector(AudioPlayer.audioSessionMessedUp(_:)))
                 #endif
-                observe(AVPlayerItemDidPlayToEndTimeNotification, selector: "playerItemDidEnd:")
+                observe(AVPlayerItemDidPlayToEndTimeNotification, selector: #selector(AudioPlayer.playerItemDidEnd(_:)))
             }
         }
     }
@@ -695,7 +695,7 @@ public class AudioPlayer: NSObject {
             let target = ClosureContainer() { [weak self] sender in
                 self?.retryOrPlayNext()
             }
-            let timer = NSTimer(timeInterval: retryTimeout, target: target, selector: "callSelectorOnTarget:", userInfo: nil, repeats: false)
+            let timer = NSTimer(timeInterval: retryTimeout, target: target, selector: #selector(ClosureContainer.callSelectorOnTarget(_:)), userInfo: nil, repeats: false)
             NSRunLoop.mainRunLoop().addTimer(timer, forMode: NSRunLoopCommonModes)
             retryTimer = timer
         }
@@ -969,7 +969,7 @@ public class AudioPlayer: NSObject {
                 case "currentItem.playbackBufferEmpty":
                     //The buffer is empty and player is loading
                     if state == .Playing && !qualityIsBeingChanged {
-                        interruptionCount++
+                        interruptionCount += 1
                     }
                     
                     stateBeforeBuffering = state
@@ -1120,7 +1120,7 @@ public class AudioPlayer: NSObject {
                 stateWhenConnectionLost = state
                 if let currentItem = player?.currentItem where currentItem.playbackBufferEmpty {
                     if state == .Playing && !qualityIsBeingChanged {
-                        interruptionCount++
+                        interruptionCount += 1
                     }
                     state = .WaitingForConnection
                     beginBackgroundTask()
@@ -1184,13 +1184,13 @@ public class AudioPlayer: NSObject {
                 player?.seekToTime(CMTime(seconds: cip, preferredTimescale: 1000000000))
             }
             
-            retryCount++
+            retryCount += 1
             
             //We gonna cancel this current retry and create a new one if the player isn't playing after a certain delay
             let target = ClosureContainer() { [weak self] sender in
                 self?.retryOrPlayNext()
             }
-            let timer = NSTimer(timeInterval: retryTimeout, target: target, selector: "callSelectorOnTarget:", userInfo: nil, repeats: false)
+            let timer = NSTimer(timeInterval: retryTimeout, target: target, selector: #selector(ClosureContainer.callSelectorOnTarget(_:)), userInfo: nil, repeats: false)
             NSRunLoop.mainRunLoop().addTimer(timer, forMode: NSRunLoopCommonModes)
             retryTimer = timer
         }
@@ -1289,7 +1289,7 @@ public class AudioPlayer: NSObject {
             let target = ClosureContainer() { [weak self] sender in
                 self?.adjustQualityIfNecessary()
             }
-            let timer = NSTimer(timeInterval: adjustQualityTimeInternal, target: target, selector: "callSelectorOnTarget:", userInfo: nil, repeats: false)
+            let timer = NSTimer(timeInterval: adjustQualityTimeInternal, target: target, selector: #selector(ClosureContainer.callSelectorOnTarget(_:)), userInfo: nil, repeats: false)
             NSRunLoop.mainRunLoop().addTimer(timer, forMode: NSRunLoopCommonModes)
             qualityAdjustmentTimer = timer
         }
